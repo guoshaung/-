@@ -1,298 +1,401 @@
-#include<stdio.h>
-#include<string.h>
+/*Cè¯­è¨€å®ç°ç®€å•çš„èˆªç­ç®¡ç†ç³»ç»Ÿï¼ˆå•ä¸ªæ–‡ä»¶ï¼‰*/
+#include <stdio.h>
+#include <string.h>
 #include<stdlib.h>
-#include<math.h>
-#define MAX 100
-struct air_set //×ùÎ»ĞÅÏ¢£¨ÓÃ·É»úĞÍºÅËã
-{
-	int set_1;//1¼¶×ùÎ»ÊıÁ¿£¬ÏÂÍ¬ 
-	int price_1;//1¼¶×ùÎ»¼Û¸ñ£¬ÏÂÍ¬ 
-	int set_2;
-	int price_2;
-	int set_3; 
-	int price_3;
-};
-struct air_set_inf//×ùÎ»Ê¹ÓÃĞÅÏ¢ 
-{
-	int set1;//1¼¶×ùÎ»Ê¹ÓÃÊıÁ¿ 
-	int set2;
-	int set3;
-};
-struct air_inf //¼ÇÂ¼·É»úĞÍºÅÓÃÀ´¼ÆËã×ùÎ»ºÍÆ±¼Û  
-{
-	char air_mod[3];//·É»úĞÍºÅ 
-	struct air_set set;//×ùÎ»ĞÅÏ¢£¨ÓÃ·É»úĞÍºÅËã  
-	struct air_set_inf setinf;//×ùÎ»Ê¹ÓÃĞÅÏ¢ 
-};
-struct off_land_pla //Æğ½µµØµã 
-{
-	char off_air[10];//Æğ·É»ú³¡ 
-	char land_air[10];//½µÂä»ú³¡ 
-	char off_dep[10];//Æğ·É³ÇÊĞ 
-	char land_dep[10];//½µÂä³ÇÊĞ 
-};
-struct air_time//º½°àÊ±¼ä 
-{
-	int off_day;//Æğ·ÉÈÕ 
-	int off_time;//Æğ·ÉÊ±¼ä 
-	int fly_time;//·ÉĞĞÊ±¼ä 
-};
-struct user_inf//¶©Æ±ÓÃ»§µÄĞÅÏ¢ 
-{
-	int name;//ÓÃ»§Ãû×Ö 
-	int num;//¶©Æ±ÊıÁ¿ 
-	int set;//¼¸¼¶×ùÎ» 
-	struct user_inf *next;
-};
-struct wait_inf//ºò²¹ÓÃ»§µÄĞÅÏ¢ 
-{
-	int name;//ÓÃ»§Ãû×Ö 
-	int num;//¶©Æ±ÊıÁ¿ 
-	int set;//¼¸¼¶×ùÎ» 
-	struct user_inf *next;
-};
+#include<assert.h>
 
-struct fl_inf //º½°àĞÅÏ¢ 
-{
-	char fli_num[6];//º½°àºÅ£¨ÏŞÖÆ6Î» 
-	struct air_inf ainf;//·É»úĞÅÏ¢ 
-	struct off_land_pla pla;//Æğ½µµØµã 
-	struct air_time time;//º½°àÊ±¼äĞÅÏ¢ 
-	struct user_inf uinf;//¶©Æ±ÓÃ»§µÄĞÅÏ¢
-	struct wait_inf winf;//ºò²¹ÓÃ»§µÄĞÅÏ¢
-	struct fl_inf *next;
-};
+#define PERSON_MAXNUM 100
+#define PERSONNOTICKET_MAX 10
+#define MAX_SIZE 10
+int _size = 0;
+int _person_size = 0;
+int _personnoticket_size = 0;
 
-void FlaiNumSeach(struct fl_inf *p,char *ch)//º½°àºÅ²éÑ¯ (Ó¦µ±¿ÉÒÔÖ±½Ó×ªµ½¶©Æ± 
+//å®šä¹‰èˆªç­ä¿¡æ¯ç»“æ„ä½“
+typedef struct plane
 {
-	struct fl_inf *i;
-	for(i=p->next;strcmp(i->fli_num,ch)!=0&&i;i=i->next);//ÕÒµ½ÏàÍ¬º½°àºÅ»òµ½Í·Í£ÏÂ 
-	if(i)//Èç¹û²»ÊÇµ½Í·Í£ÏÂÔòËµÃ÷ÓĞ´Ëº½°à 
-	{
-		printf("º½°à%sĞÅÏ¢ÈçÏÂ\n",ch);
-		printf("ÓÉ%s³ÇÊĞµÄ%sÆğ·ÉÖÁ%s³ÇÊĞµÄ%s½µÂä\n",i->pla.off_dep,i->pla.off_air,i->pla.land_dep,i->pla.land_air);
-		printf("Ô¤¼ÆÆğ·ÉÊ±¼äÎª%dÈÕµÄ%d£¬Ô¤¼ÆÂ·³Ì»¨·Ñ%d\n",i->time.fly_time,i->time.off_time,i->time.fly_time);
-		printf("»úĞÍÎª%s\n",i->ainf.air_mod);
-		printf("Ê£ÓàÒ»¼¶×ùÎ»ÊıÁ¿:%d",i->ainf.set.set_1-i->ainf.setinf.set1);
-		printf("Ê£Óà¶ş¼¶×ùÎ»ÊıÁ¿:%d",i->ainf.set.set_2-i->ainf.setinf.set2);
-		printf("Ê£ÓàÈı¼¶×ùÎ»ÊıÁ¿:%d",i->ainf.set.set_3-i->ainf.setinf.set3);
-		printf("Ò»¼¶×ùÎ»ºò²¹Ô¤Ô¼ÈËÊıÎª%d");//µ÷ÓÃ¼ÆËãºò²¹ÈËÊıº¯Êı 
-		printf("¶ş¼¶×ùÎ»ºò²¹Ô¤Ô¼ÈËÊıÎª%d");//µ÷ÓÃ¼ÆËãºò²¹ÈËÊıº¯Êı 
-		printf("Èı¼¶×ùÎ»ºò²¹Ô¤Ô¼ÈËÊıÎª%d");//µ÷ÓÃ¼ÆËãºò²¹ÈËÊıº¯Êı 
-		printf("\n");
-	}
-	else
-	{
-		printf("ÎŞ´Ëº½°à¼ÇÂ¼£¬½¨ÒéÖØĞÂ²éÑ¯\n");
-	}
+    char ID[10];
+    char Start_Place[10];
+    char End_Place[10];
+    float price;
+    int Buy_num;
+    int Max_num;
+    char time[20];
+}Plane;
+
+//å®šä¹‰ä¹˜å®¢ä¿¡æ¯ç»“æ„ä½“
+typedef struct Person
+{
+    int AirPlane_Num;
+    char person_name[20];
+
+}Person;
+
+
+
+
+void home(Plane* p,Person* person, Person* person_noticket);//åˆå§‹é¡µé¢
+void InitAirPlane(Plane** p);//åˆå§‹åŒ–èˆªç­ä¿¡æ¯å†…å­˜
+void InputAirPlane(Plane* p);//è¾“å…¥èˆªç­ä¿¡æ¯
+void CheckAirPlane(Plane* p);//æŸ¥çœ‹èˆªç­ä¿¡æ¯
+void DelAirPlane(Plane* p);//åˆ é™¤èˆªç­ä¿¡æ¯
+void CheckAirPlaneOrder(Plane* p,Person* person);//æŸ¥çœ‹èˆªç­è®¢å•
+void PrintPerson(Plane* p, Person* person, int i);//æ‰“å°èˆªç­ä¹˜å®¢
+void InitPerson(Person** person);//åˆå§‹åŒ–ä¹˜å®¢ä¿¡æ¯å†…å­˜
+void BookAirPlane(Plane* p, Person* person,Person* person_noticket);//é¢„å®šèˆªç­
+int CheckPerson(Plane* p, Person* person);//æŸ¥çœ‹ä¹˜å®¢è®¢å•ä¿¡æ¯
+void ChangeAirPlane(Plane* p, Person* person);//æ”¹ç­¾
+void ReturnTicket(Plane* p, Person* person);//é€€ç¥¨
+void PrintPerson(Plane* p, Person* person, int i);
+void CheckPersonNoTicket(Plane* p, Person* person_noticket);//æŸ¥çœ‹å€™è¡¥åå•
+///
+
+void home(Plane* p, Person* person, Person* person_noticket)
+{
+    int a, i, j;
+    printf("\n*****************************æ¬¢è¿è¿›å…¥é£æœºç¥¨åŠ¡ç³»ç»Ÿ*****************************\n");
+    printf("\n*************æ‚¨å¥½ï¼Œç°åœ¨è¦ç¡®è®¤æ‚¨çš„èº«ä»½ï¼ç¥¨åŠ¡äººå‘˜è¯·æŒ‰ 1 ï¼Œæ—…å®¢è¯·æŒ‰ 0 ***********\n");
+    printf("è¯·é€‰æ‹©ï¼š");
+    scanf("%d", &a);
+    //èˆªç­ç®¡ç†äººå‘˜æ“ä½œ
+    if (a == 1)
+        do{
+            printf("\n****************** 1.è¾“å…¥èˆªç­ä¿¡æ¯ *******************\n");
+            printf("\n****************** 2.åˆ é™¤èˆªç­ä¿¡æ¯ *******************\n");
+            printf("\n****************** 3.æµè§ˆèˆªç­ä¿¡æ¯ *******************\n");
+            printf("\n****************** 4.æµè§ˆç›®å‰å·²è®¢ç¥¨ä¿¡æ¯ *************\n");
+            printf("\n****************** 5.æŸ¥çœ‹å€™è¡¥åå• *******************\n");
+            printf("\n****************** 0.é€€å‡º        ********************\n");
+            printf("è¯·é€‰æ‹©ï¼š");
+            scanf("%d", &i);
+            switch (i)
+            {
+                case 0: break;
+                case 1:InputAirPlane(p);break;
+                case 2:DelAirPlane(p);break;
+                case 3:CheckAirPlane(p);break;
+                case 4:CheckAirPlaneOrder(p, person); break;
+                case 5:CheckPersonNoTicket(p, person_noticket); break;
+                default:
+                    printf("è¾“å…¥é”™è¯¯ï¼\n");
+                    break;
+            }
+        } while (i != 0);
+    //ä¹˜å®¢æ“ä½œ
+    if (a == 0)
+        do{
+
+            printf("\n*********************** 1.è®¢ç¥¨ **********************\n");
+            printf("\n*********************** 2.æ”¹ç­¾ **********************\n");
+            printf("\n*********************** 3.é€€ç¥¨ **********************\n");
+            printf("\n*********************** 4.æµè§ˆèˆªç­ä¿¡æ¯ **************\n");
+            printf("\n*********************** 5.æŸ¥è¯¢ä¸ªäººè®¢ç¥¨ä¿¡æ¯ **********\n");
+            printf("\n*********************** 0.é€€å‡º **********************\n");
+            printf("è¯·é€‰æ‹©ï¼š");
+            scanf("%d", &j);
+            switch (j)
+            {
+                case 0:break;
+                case 1:BookAirPlane(p, person,person_noticket);break;
+                case 2:ChangeAirPlane(p, person);break;
+                case 3:ReturnTicket(p, person);break;
+                case 4:CheckAirPlane(p);break;
+                case 5:CheckPerson(p, person); break;
+            }
+        } while (j != 0);
 }
 
-void FlaiPlaSeach(struct fl_inf *p,char *ch)//º½°àµØµã²éÑ¯(Ó¦µ±¿ÉÒÔÖ±½Ó×ªµ½¶©Æ± 
+//åˆå§‹åŒ–
+void InitAirPlane(Plane** p)
 {
-}
+    assert(p);
 
-void BookAir(struct fl_inf *p,char *ch)//Í¨¹ıº½°àºÅ¶©Æ± 
-{	
+    //ç”³è¯·ç©ºé—´
+    *p = (Plane*)malloc(sizeof(Plane)*MAX_SIZE);
+    if (NULL == *p)
+    {
+        printf("å¼€è¾Ÿç©ºé—´å¤±è´¥ï¼\n");
+        return;
+    }
+    (*p)->Buy_num = 0;
 }
-
-void FlaiSeach(struct fl_inf *p)//º½°à²éÑ¯ 
+//è¾“å…¥èˆªç­ä¿¡æ¯
+void InputAirPlane(Plane* p)
 {
-	int choice;
-	while (1)
-	{
-		printf(">>>>>>>>»¶Ó­À´µ½º½¿Õ²éÑ¯ÏµÍ³<<<<<<<<\n");
-		printf("||Ñ¡Ïî1£º²éÑ¯º½°àºÅ        ||\n");
-		printf("||Ñ¡Ïî2£º²éÑ¯Ä¿µÄµØ        ||\n");
-		printf("||Ñ¡Ïî3£º²éÑ¯º½°àÊ±¼ä      ||\n");
-		printf("||Ñ¡Ïî0£ºÍË³ö              ||\n");
-		printf("||ÇëÊäÈëÄúµÄÑ¡Ôñ£º         ||\n");
-		scanf("%d", &choice);
-		switch(choice)
-		{
-			case 1:
-				{
-					printf("ÇëÊäÈë²éÑ¯µÄº½°àºÅ"); 
-					char ch[6];
-					scanf("%s",ch);
-					FlaiNumSeach(p,ch);				
-				}
-
-				break;
-			case 2:
-				{
-					printf("ÇëÊäÈë²éÑ¯µÄµØµã"); 
-					char ch[10];
-					scanf("%s",ch);
-					FlaiPlaSeach(p,ch);				
-				}				
-				break;
-			case 3:
-				{
-					printf("ÇëÊäÈë²éÑ¯µÄÊ±¼ä"); //ÔİÊ±»¹Ã»ÏëºÃÔõÃ´²éÊ±¼ä¶Î¡£¡£¡£Òª²»²»Ğ´£¿ 
-					char ch[6];
-					scanf("%s",ch);
-					FlaiNumSeach(p,ch);				
-				}				
-				break;
-			case 0:
-				
-				return ;
-		}
-	}
+    if (_size <= MAX_SIZE)
+    {
+        printf("èˆªç­ç¼–å·ï¼š%d\n", _size);
+        printf("è¾“å…¥èˆªç­ID:");
+        scanf("%s", (p+_size)->ID);
+        printf("è¾“å…¥å§‹å‘åœ°ï¼š");
+        scanf("%s", (p + _size)->Start_Place);
+        printf("è¾“å…¥ç›®çš„åœ°ï¼š");
+        scanf("%s", (p + _size)->End_Place);
+        printf("è¾“å…¥èˆªç­èµ·é£æ—¶é—´ï¼š");
+        scanf("%s", (p + _size)->time);
+        printf("è¾“å…¥ä»·æ ¼ï¼š");
+        scanf("%f", &(p + _size)->price);
+        printf("è¾“å…¥èˆªç­å¯ä¹˜åæœ€å¤§äººæ•°ï¼š");
+        scanf("%d", &(p + _size)->Max_num);
+        do
+        {
+            printf("ç›®å‰å–å‡ºæœºç¥¨æ•°é‡ï¼š");
+            scanf("%d", &(p + _size)->Buy_num);
+            if ((p + _size)->Buy_num > (p + _size)->Max_num)
+            {
+                printf("è¾“å…¥å·²å–å‡ºæœºç¥¨æ•°é‡é”™è¯¯ï¼\n");
+                printf("è¯·é‡æ–°è¾“å…¥ï¼\n\n");
+            }
+        } while ((p + _size)->Buy_num > (p + _size)->Max_num);
+        _size++;
+        printf("æ·»åŠ èˆªç­ä¿¡æ¯å®Œæˆï¼\n\n");
+    }
+    else
+    {
+        printf("å†…å­˜å·²æ»¡ï¼\n");
+        return;
+    }
 }
-//void read(char arr[])
-//{int i=0;
-//	while((a=getchar())!='\0')
-//	{
-//		arr[i]=a;
-//         i++;
-//	}
-//}
-void DisPlay(struct fl_inf *p)
+
+//æµè§ˆèˆªç­ä¿¡æ¯
+void CheckAirPlane(Plane* p)
 {
-			printf("º½°à%sĞÅÏ¢ÈçÏÂ\n",p->fli_num);
-			printf("ÓÉ%s³ÇÊĞµÄ%sÆğ·ÉÖÁ%s³ÇÊĞµÄ%s½µÂä\n",p->pla.off_dep,p->pla.off_air,p->pla.land_dep,p->pla.land_air);
-			printf("Ô¤¼ÆÆğ·ÉÊ±¼äÎª%dÈÕµÄ%d£¬Ô¤¼ÆÂ·³Ì»¨·Ñ%d\n",p->time.fly_time,p->time.off_time,p->time.fly_time);
-			printf("»úĞÍÎª%s\n",p->ainf.air_mod);
-			printf("Ê£ÓàÒ»¼¶×ùÎ»ÊıÁ¿:%d",p->ainf.set.set_1-p->ainf.setinf.set1);
-			printf("Ê£Óà¶ş¼¶×ùÎ»ÊıÁ¿:%d",p->ainf.set.set_2-p->ainf.setinf.set2);
-			printf("Ê£ÓàÈı¼¶×ùÎ»ÊıÁ¿:%d",p->ainf.set.set_3-p->ainf.setinf.set3);
-			printf("Ò»¼¶×ùÎ»ºò²¹Ô¤Ô¼ÈËÊıÎª%d");//µ÷ÓÃ¼ÆËãºò²¹ÈËÊıº¯Êı 
-			printf("¶ş¼¶×ùÎ»ºò²¹Ô¤Ô¼ÈËÊıÎª%d");//µ÷ÓÃ¼ÆËãºò²¹ÈËÊıº¯Êı 
-			printf("Èı¼¶×ùÎ»ºò²¹Ô¤Ô¼ÈËÊıÎª%d");//µ÷ÓÃ¼ÆËãºò²¹ÈËÊıº¯Êı 	
+    int i = 0;
+    printf("ç›®å‰åœ¨å”®çš„èˆªç­ä¿¡æ¯ï¼š\n\n");
+    for (i = 0; i < _size; i++)
+    {
+        printf("èˆªç­ç¼–å·ï¼š%d\n", i);
+        printf("ID:%s\n", (p+i)->ID);
+        printf("å§‹å‘åœ°ï¼š%s\n", (p + i)->Start_Place);
+        printf("ç›®çš„åœ°:%s\n", (p + i)->End_Place);
+        printf("èµ·é£æ—¶é—´ï¼š%s\n", (p + i)->time);
+        printf("æœºç¥¨ä»·æ ¼ï¼š%2f\n", (p + i)->price);
+        printf("å‰©ä½™æœºç¥¨ï¼š%d\n", ((p + i)->Max_num - (p + i)->Buy_num) );
+        printf("\n");
+    }
 }
 
-void Delete_air(struct fl_inf *p,char arr[])//É¾³ıĞèÒªº½°àºÅ 
+//åˆ é™¤èˆªç­ä¿¡æ¯
+void DelAirPlane(Plane* p)
 {
-	int index=-1;//Ò»¸ö±êÖ¾Î»£¬ÓÃÓÚ¼ìÑéÍ·½áµã 
-	struct fl_inf *q=p;
-	while(q->next->fli_num!=NULL)
-	{
-		
-		if(!strcmp(q->fli_num,arr)&&index==-1)//ÏàµÈ·µ»Ø0,µ¥¶ÀÌÖÂÛ 
-		{
-			p=p->next;
-			return ;
-		 } 
-		 
-		 if(!strcmp(q->next->fli_num,arr))
-		 {
-		 q->next=q->next->next;
-		 return ;
-		 }
-		 else
-		 {
-		 	q=q->next;
-		 	index=1;
-		 }
-	}
-	return ;
+    int j = 0;
+    int i = -1;
+    assert(p);
+    printf("è¯·è¾“å…¥è¦åˆ é™¤çš„èˆªç­ç¼–å·ï¼š");
+    scanf("%d", &i);
+    for (j = i; j < _size; j++)
+    {
+        strcpy((p + j)->ID, (p + j + 1)->ID);
+        strcpy((p + j)->Start_Place, (p + j + 1)->Start_Place);
+        strcpy((p + j)->End_Place, (p + j)->End_Place);
+        strcpy((p + j)->time, (p + j + 1)->time);
+        (p + j)->price = (p + j + 1)->price;
+        (p + j)->Max_num = (p + j + 1)->Max_num;
+        (p + j)->Buy_num = (p + j + 1)->Buy_num;
+    }
+    _size--;
 }
 
-void Insert_air(struct fl_inf *p)//Ìí¼Óº½°àĞÅÏ¢£¬ĞèÒªÍêÕûÊäÈëĞÅÏ¢ 
+//åˆå§‹åŒ–è®¢ç¥¨ä¿¡æ¯
+void InitPerson(Person** person)
 {
-	struct fl_inf q;
-	printf("ÇëÊäÈëĞÂÔöº½°àºÅ:\n");
-	char num[6];
-	for(int i=0;i<6;i++)
-	scanf("%c",num[i]);
-	strcpy(q.fli_num,num);
-	printf("ÇëÊäÈë·É»úĞÅÏ¢£º\n");
-	char num1[3];
-	for(int i=0;i<3;i++)
-	scanf("%c",num1[i]);
-	strcpy(q.ainf.air_mod,num1);
-	printf("ÇëÊäÈëÆğ½µµØµã£º\n");
-	char num2[10],num3[10],num4[10],num5[10];
-	scanf("%s%s%s%s",num2,num3,num4,num5);
-	strcpy(q.pla.land_air,num2);
-	strcpy(q.pla.land_dep,num3);
-	strcpy(q.pla.off_air,num4);
-	strcpy(q.pla.off_dep,num5);
-	printf("ÇëÊäÈëº½°àÊ±¼äĞÅÏ¢£º\n");
-	int i,j,k;
-	scanf("%d%d%d",&i,&j,&k);
-	q.time.fly_time=i;q.time.off_day=j;q.time.off_time=k;
-//	printf("ÇëÊäÈë¶©Æ±ÓÃ»§ĞÅÏ¢£º\n");
-//	printf("ÇëÊäÈëºò²¹ÓÃ»§ĞÅÏ¢£º\n");
-	struct fl_inf *fp=p;
-	for(int i=0;fp->next!=NULL;fp=fp->next);
-	fp->next=&q;
+    assert(person);
+    *person = (Person*)malloc(sizeof(Person)*PERSON_MAXNUM);
+    if (NULL == *person)
+    {
+        printf("å¼€è¾Ÿç©ºé—´å¤±è´¥ï¼\n");
+        return;
+    }
 }
 
-int getNextLinePos(FILE *fp) {
-	char ch;
-	ch = fgetc(fp);
-	while (ch != EOF) {
-		ch = fgetc(fp);
-		if (ch == '\n') {
-			break;
-		}
-	}
-}
-
-
-
-void inif(struct fl_inf *p)
+//è®¢ç¥¨
+void BookAirPlane(Plane* p, Person* person, Person* person_noticket)
 {
-	FILE *fp;
-	fp=fopen("D:\\ĞÂ×ÀÃæ\\º½°àĞÅÏ¢.text","w+");
-	if (fp == NULL) {
-		printf("´ò¿ª·¢Éú´íÎó");
-		exit(0);
-	}//´ò¿ªÎÄ¼ş
-	while (!feof(fp)) {
-		fscanf(fp, "%s", p->ainf);
-		fscanf(fp, "%s", books[i].brief);
-		
-		
-	}
+    int i = -1;
+    CheckAirPlane(p);
+    printf("è¯·é€‰æ‹©ä½ è¦é¢„å®šçš„èˆªç­ç¼–å·ï¼š");
+    scanf("%d", &i);
+    if ((p + i)->Max_num == (p + i)->Buy_num)
+    {
+        printf("å¯¹ä¸èµ·ï¼Œè¯¥èˆªç­æœºç¥¨å·²å”®å®Œï¼\n");
+        printf("è¯·è¾“å…¥æ‚¨çš„å§“åï¼ˆæˆ‘ä»¬å°†æŠŠæ‚¨æ·»åŠ è¿›å€™è¡¥åå•ï¼‰ï¼š");
+        scanf("%s", (person_noticket+_personnoticket_size)->person_name);
+        (person_noticket + _personnoticket_size)->AirPlane_Num = i;
+        _personnoticket_size++;
+        printf("æ·»åŠ å€™è¡¥åå•æˆåŠŸï¼\n\n");
+        return;
+    }
+    else
+    {
+        if (_person_size > PERSON_MAXNUM)
+        {
+            printf("å­˜å‚¨å®¹é‡ä¸è¶³ï¼\n");
+            return;
+        }
+        printf("è¯·è¾“å…¥å§“åï¼š");
+        scanf("%s", (person + _person_size)->person_name);
+        (person + _person_size)->AirPlane_Num = i;
+        _person_size++;
+        (p + i)->Buy_num++;
+        printf("é¢„å®šæˆåŠŸï¼\n");
+    }
+
 }
+
+//æŸ¥çœ‹ä¸ªäººè®¢ç¥¨ä¿¡æ¯
+int CheckPerson(Plane* p, Person* person)
+{
+    int flag = 0;
+    int i = 0;
+    char _name[20] = { 0 };
+    printf("è¯·è¾“å…¥æ‚¨çš„å§“åï¼š");
+    scanf("%s", &_name);
+    printf("æ‚¨çš„ä¸ªäººè®¢ç¥¨ä¿¡æ¯ï¼š\n\n");
+    for (i = 0; i < _person_size; i++)
+    {
+        if (0 == strcmp(_name, (person + i)->person_name))
+        {
+            flag = 1;
+            printf("è®¢å•ç¼–å·ï¼š%d\n", i);
+            printf("å§“åï¼š%s\n", (person + i)->person_name);
+            printf("èˆªç­ç¼–å·ï¼š%d\n", (person + i)->AirPlane_Num);
+            printf("èˆªç­ID:%s\n", (p + (person + i)->AirPlane_Num)->ID);
+            printf("å§‹å‘åœ°ï¼š%s\n", (p + (person + i)->AirPlane_Num)->Start_Place);
+            printf("ç›®çš„åœ°ï¼š%s\n", (p + (person + i)->AirPlane_Num)->End_Place);
+            printf("èµ·é£æ—¶é—´:%s\n", (p + (person + i)->AirPlane_Num)->time);
+            printf("æœºç¥¨ä»·æ ¼ï¼š%f\n", (p + (person + i)->AirPlane_Num)->price);
+            printf("\n");
+        }
+    }
+    if (0 == flag)
+    {
+        printf("æœªæ‰¾åˆ°è¯¥ä¹˜å®¢è®¢ç¥¨ä¿¡æ¯ï¼\n");
+        return 0;
+    }
+    return 1;
+}
+
+//æ”¹ç­¾
+void ChangeAirPlane(Plane* p, Person* person)
+{
+    int i = -1;
+    int j = -1;
+    if (0 == CheckPerson(p, person))
+    {
+        return;
+    }
+    printf("è¯·è¾“å…¥è¦æ”¹ç­¾çš„è®¢å•ç¼–å·ï¼š");
+    printf("\n");
+    scanf("%d", &i);
+    (p + i)->Buy_num--;
+    CheckAirPlane(p);
+    do
+    {
+        printf("è¯·è¾“å…¥è¦æ”¹ç­¾çš„èˆªç­ç¼–å·ï¼š");
+        scanf("%d", &j);
+        if ((p + j)->Buy_num >= (p + j)->Max_num)
+        {
+            printf("è¯¥æ¬¡èˆªç­å·²æ»¡å‘˜ï¼Œè¯·é‡æ–°é€‰æ‹©ï¼\n");
+        }
+    } while ((p + j)->Buy_num >= (p + j)->Max_num);
+    (person + i)->AirPlane_Num = j;
+    (p + j)->Buy_num++;
+    printf("æ”¹ç­¾æˆåŠŸï¼\n\n");
+}
+
+
+//åˆ é™¤è®¢å•
+void ReturnTicket(Plane* p, Person* person)
+{
+    int i = -1;
+    int j = 0;
+    CheckPerson(p, person);
+    printf("è¯·è¾“å…¥è¦åˆ é™¤çš„è®¢å•ç¼–å·ï¼š");
+    scanf("%d", &i);
+    for (j = i; j < _person_size; j++)
+    {
+        (person + j)->AirPlane_Num = (person + j + 1)->AirPlane_Num;
+        strcpy((person + j)->person_name, (person + j + 1)->person_name);
+    }
+    printf("é€€ç¥¨æˆåŠŸï¼\n");
+}
+
+
+//æŸ¥çœ‹ç›®å‰è®¢ç¥¨ä¿¡æ¯
+void CheckAirPlaneOrder(Plane* p, Person* person)
+{
+    int i = -1;
+    for (i = 0; i < _size; i++)
+    {
+        printf("èˆªç­ç¼–å·ï¼š%d\n", i);
+        printf("ID:%s\n", (p + i)->ID);
+        printf("å§‹å‘åœ°ï¼š%s\n", (p + i)->Start_Place);
+        printf("ç›®çš„åœ°:%s\n", (p + i)->End_Place);
+        printf("èµ·é£æ—¶é—´ï¼š%s\n", (p + i)->time);
+        printf("æœºç¥¨ä»·æ ¼ï¼š%2f\n", (p + i)->price);
+        printf("å‰©ä½™æœºç¥¨ï¼š%d\n", ((p + i)->Max_num - (p + i)->Buy_num));
+        printf("ä¹°ç¥¨äººä¿¡æ¯ï¼š"); PrintPerson(p,person, i);
+    }
+}
+void PrintPerson(Plane* p, Person* person,int i)
+{
+    int ticket_num = 0;
+    int j = 0;
+    for (j = 0; j < _person_size; j++)
+    {
+        if ((person + j)->AirPlane_Num == i)
+        {
+            printf("%s ,", (person + j)->person_name);
+            ticket_num++;
+        }
+    }
+    printf("\n\n");
+}
+
+//å€™è¡¥åå•åˆå§‹åŒ–
+void InitPersonNoTicket(Person** person_noticket)
+{
+    assert(person_noticket);
+    *person_noticket = (Person*)malloc(sizeof(Person)*PERSONNOTICKET_MAX);
+    if (NULL == *person_noticket)
+    {
+        printf("å¼€è¾Ÿç©ºé—´å¤±è´¥ï¼\n");
+        return;
+    }
+}
+
+//æŸ¥çœ‹å€™è¡¥åå•
+void CheckPersonNoTicket(Plane* p, Person* person_noticket)
+{
+    int i = 0;
+    printf("å€™è¡¥åå•ï¼š\n\n");
+    if (0 == _personnoticket_size)
+    {
+        printf("å€™è¡¥åå•ä¸ºç©ºï¼\n\n");
+        return;
+    }
+    for (i = 0; i < _personnoticket_size; i++)
+    {
+        printf("å§“åï¼š%s\n", (person_noticket + i)->person_name);
+        printf("æ‰€éœ€è¦èˆªç­ç¼–å·ï¼š%d\n", (person_noticket + i)->AirPlane_Num);
+        printf("èˆªç­ID:%s\n", (p + ((person_noticket + i)->AirPlane_Num))->ID);
+        printf("å§‹å‘åœ°ï¼š%s\n", ((p + ((person_noticket + i)->AirPlane_Num))->Start_Place));
+        printf("ç›®çš„åœ°ï¼š%s\n", (p + ((person_noticket + i)->AirPlane_Num))->End_Place);
+    }
+}
+//ä¸»å‡½æ•°
 int main()
 {
-	
-	struct fl_inf phead,*p=&phead;
-	inif(p);//³õÊ¼»¯º½°àĞÅÏ¢ 
-	int choice;
-	while (1)
-	{
-		printf(">>>>>>>>»¶Ó­À´µ½º½¿Õ¶©Æ±ÏµÍ³<<<<<<<<\n");
-		printf("||Ñ¡Ïî1£º²éÑ¯º½°à        ||\n");
-		printf("||Ñ¡Ïî2£º¶©Æ±ÏµÍ³        ||\n");
-		printf("||Ñ¡Ïî3£º¸ÄÍËÆ±ÏµÍ³      ||\n");
-		printf("||Ñ¡Ïî4£ºĞŞ¸Äº½°àĞÅÏ¢    ||\n");
-		printf("||Ñ¡Ïî5: º½¿Õ¹«Ë¾Ìí¼Óº½°à||\n");
-		printf("||Ñ¡Ïî6: º½¿Õ¹«Ë¾É¾³ıº½°à||\n");
-		printf("||Ñ¡Ïî0£ºÍË³ö            ||\n");
-		printf("||ÇëÊäÈëÄúµÄÑ¡Ôñ£º       ||\n");
-		scanf("%d", &choice);
-		system("cls");
-		switch(choice)
-		{
-			case 1:
-				FlaiSeach(p);
-				break;
-			case 2:
-				
-				break;
-			case 3:
-				
-				break;
-			case 4:
-				
-				break;
-			case 5:
-				
-				break;
-			case 6:
-				
-				break;
-			
-			case 0:
-				return 0;
-		}
-	}
-	return 0;
+    Plane* p=NULL;
+    Person* person=NULL;
+    Person* person_noticket = NULL;
+    InitPersonNoTicket(&person_noticket);
+    InitAirPlane(&p);
+    InitPerson(&person);
+    while (1)
+    {
+        home(p, person, person_noticket);
+    }
+    system("pause");
+    return 0;
 }
-
-
